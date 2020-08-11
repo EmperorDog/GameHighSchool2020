@@ -6,6 +6,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
+    public CubeSpawner m_CubeSpawner;
+
     public int m_Life = 3;
     public int m_Score = 0;
 
@@ -15,6 +17,8 @@ public class GameManager : MonoBehaviour
             Instance = this;
         else
             Destroy(gameObject);
+
+        m_CubeSpawner.SpawnStart();
     }
 
     public void AddScore()
@@ -26,7 +30,7 @@ public class GameManager : MonoBehaviour
         m_Life--;
         if(m_Life <= 0)
         {
-
+            m_CubeSpawner.gameObject.SetActive(false);
         }
     }
 }
