@@ -9,6 +9,8 @@ public class PlayerControler : MonoBehaviour
     private Rigidbody2D m_Rigidbody2D;
     private Animator m_Animator;
 
+    public float m_ClimbSpeed = 2f;
+
     public float m_XAxisSpeed = 3f;
     public float m_YJumpPower = 3f;
 
@@ -16,6 +18,9 @@ public class PlayerControler : MonoBehaviour
 
     public bool m_IsClimbing = false;
     public bool m_IsJumping = false;
+
+    public bool m_IsTouchLadder = false;
+    public bool m_m_IsClimbing = false;
 
     protected void Start()
     {
@@ -32,21 +37,44 @@ public class PlayerControler : MonoBehaviour
         velocity.x = xAxis * m_XAxisSpeed;
         m_Rigidbody2D.velocity = velocity;
 
-        if (xAxis > 0)
-            m_Sprite.localScale = new Vector3(1, 1, 1);
-        else if (xAxis < 0)
-            m_Sprite.localScale = new Vector3(-1, 1, 1);
-
-
-        if (Input.GetKeyDown(KeyCode.Space)
-            && m_JumpCount <= 0)
+        if (m_IsTouchLadder && Mathf.Abs(yAxis) > 0.5f)
         {
-            m_Rigidbody2D.AddForce(Vector3.up
-                * m_YJumpPower);
-
-            m_JumpCount++;
+            m_IsClimbing = true;
         }
 
+        if (!m_IsClimbing)
+        {
+            if (xAxis > 0)
+                m_Sprite.localScale = new Vector3(1, 1, 1);
+            else if (xAxis < 0)
+                m_Sprite.localScale = new Vector3(-1, 1, 1);
+            if (Input.GetKeyDown(KeyCode.UpArrow)
+                && m_JumpCount <= 0)
+            {
+                m_Rigidbody2D.AddForce(Vector3.up
+                    * m_YJumpPower);
+
+                m_JumpCount++;
+            }
+        }
+        else
+        {
+            m_Rigidbody2D.constraints = m_Rigidbody2D.constraints | RigidbodyConstraints2D.FreezePosition;
+
+            Vector3 movement = Vector3.zero;
+            movement.x = xAxis * Time.deltaTime;
+            movement.y = yAxis * Time.deltaTime;
+
+            transform.position += movement;
+
+            if (Input.GetKeyDown(KeyCode.UpArrow))
+            {
+                ClimbingExit();
+            }
+
+            m_Animator.SetBool("IsClimbing", m_IsClimbing);
+            m_Animator.SetFloat("ClimbSpeed", Mathf.Abs(xAxis) + Mathf.Abs(yAxis));
+        }
         m_Animator.SetBool("IsJumping", m_IsJumping);
         m_Animator.SetFloat("Velocity X", Mathf.Abs(xAxis));
 
@@ -63,6 +91,30 @@ public class PlayerControler : MonoBehaviour
             {
                 m_JumpCount = 0;
             }
+        }
+    }
+
+    private void ClimbingExit()
+    {
+        m_Rigidbody2D.constraints = m_Rigidbody2D.constraints & ~RigidbodyConstraints2D.FreezePosition;
+        m_IsClimbing = false;
+
+        m_Animator.SetBool("IsClimbing", m_IsClimbing);
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.tag == "Ladder")
+        {
+            m_IsTouchLadder = true;
+        }    
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if(collision.tag == "Ladder")
+        {
+            m_IsTouchLadder = false;
         }
     }
 }
