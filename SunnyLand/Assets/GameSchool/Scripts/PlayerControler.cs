@@ -107,7 +107,14 @@ public class PlayerControler : MonoBehaviour
         if(collision.tag == "Ladder")
         {
             m_IsTouchLadder = true;
-        }    
+        }  
+        else if(collision.tag == "Item")
+        {
+            var item = collision.
+                GetComponent<ItemComponent>();
+            if (item != null)
+                item.Pickup();
+        }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
