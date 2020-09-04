@@ -92,6 +92,22 @@ public class PlayerControler : MonoBehaviour
                 m_JumpCount = 0;
             }
         }
+        foreach (ContactPoint2D contact in collision.contacts)
+        {
+            if (contact.normal.y > 0.5f)
+            {
+                m_JumpCount = 0;
+
+                if (contact.rigidbody)
+                {
+                    var hp = contact.rigidbody.GetComponent<HPComponent>();
+                    if (hp)
+                    {
+                        Destroy(hp.gameObject);
+                    }
+                }
+            }
+        }
     }
 
     private void ClimbingExit()
